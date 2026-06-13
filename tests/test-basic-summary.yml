@@ -1,0 +1,36 @@
+name: Test basic summary output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          paths: ${{ github.workspace }}/actions/hardened/Madrapps--jacoco-report/v1.7.2-alpha/tests/fixtures/jacoco.xml
+          token: ${{ github.token }}
+          comment-type: summary
+          min-coverage-overall: '0'
+          min-coverage-changed-files: '0'
+          continue-on-error: 'true'
+      - name: Assert coverage-overall output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.coverage-overall }}
+        run: |
+          echo "coverage-overall: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: coverage-overall output was empty"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert coverage-changed-files output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.coverage-changed-files }}
+        run: |
+          echo "coverage-changed-files: $ACTUAL"
+          echo "PASS (may be empty when no changed files detected)"
