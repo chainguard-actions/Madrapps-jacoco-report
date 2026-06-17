@@ -1,0 +1,44 @@
+name: Test JaCoCo Report - Coverage Thresholds
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: jacoco
+        uses: .
+        with:
+          paths: ${{ github.workspace }}/actions/hardened/Madrapps--jacoco-report/v1.8.0/tests/fixtures/jacoco.xml
+          token: ${{ github.token }}
+          title: 'Threshold Test Report'
+          pr-number: '42'
+          comment-type: summary
+          min-coverage-overall: '10'
+          min-coverage-changed-files: '10'
+          update-comment: 'false'
+          skip-if-no-changes: 'false'
+          pass-emoji: ':white_check_mark:'
+          fail-emoji: ':x:'
+          continue-on-error: 'true'
+          debug-mode: 'false'
+
+      - name: Assert coverage-overall is a number
+        env:
+          COVERAGE: ${{ steps.jacoco.outputs.coverage-overall }}
+        run: |
+          echo "coverage-overall: $COVERAGE"
+          if [ -z "$COVERAGE" ]; then
+            echo "FAIL: coverage-overall output is empty"
+            exit 1
+          fi
+          # Verify it looks like a number (possibly with decimal)
+          if ! echo "$COVERAGE" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
+            echo "FAIL: coverage-overall '$COVERAGE' is not a valid number"
+            exit 1
+          fi
+          echo "PASS: coverage-overall=$COVERAGE"

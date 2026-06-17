@@ -1,0 +1,44 @@
+name: Test JaCoCo Report - Summary Output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_REF: refs/pull/1/merge
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: jacoco
+        uses: .
+        with:
+          paths: ${{ github.workspace }}/actions/hardened/Madrapps--jacoco-report/v1.8.0/tests/fixtures/jacoco.xml
+          token: ${{ github.token }}
+          title: 'Coverage Report'
+          pr-number: '1'
+          comment-type: summary
+          min-coverage-overall: '50'
+          min-coverage-changed-files: '50'
+          continue-on-error: 'true'
+          debug-mode: 'true'
+
+      - name: Assert coverage-overall output is set
+        env:
+          COVERAGE: ${{ steps.jacoco.outputs.coverage-overall }}
+        run: |
+          echo "coverage-overall: $COVERAGE"
+          if [ -z "$COVERAGE" ]; then
+            echo "FAIL: coverage-overall output is empty"
+            exit 1
+          fi
+          echo "PASS: coverage-overall=$COVERAGE"
+
+      - name: Assert coverage-changed-files output is set
+        env:
+          COVERAGE_CHANGED: ${{ steps.jacoco.outputs.coverage-changed-files }}
+        run: |
+          echo "coverage-changed-files: $COVERAGE_CHANGED"
+          echo "PASS: coverage-changed-files=$COVERAGE_CHANGED"

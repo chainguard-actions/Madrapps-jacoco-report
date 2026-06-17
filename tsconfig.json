@@ -1,0 +1,9 @@
+{
+  "extends": "@tsconfig/node24/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./lib",
+    "noImplicitAny": true,
+    "isolatedModules": true
+  },
+  "exclude": ["node_modules"]
+}
