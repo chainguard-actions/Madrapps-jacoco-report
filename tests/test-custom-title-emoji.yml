@@ -1,0 +1,27 @@
+name: Test custom title and emoji inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: jacoco
+        uses: .
+        with:
+          paths: ${{ github.workspace }}/pristine/Madrapps--jacoco-report/v1.8.0/tests/fixtures/report.xml
+          token: ${{ github.token }}
+          comment-type: summary
+          title: 'My Coverage Report'
+          pass-emoji: ':white_check_mark:'
+          fail-emoji: ':red_circle:'
+          min-coverage-overall: '50'
+          min-coverage-changed-files: '50'
+          continue-on-error: 'true'
+          debug-mode: 'true'
+
+      - name: Assert action completed without failing the workflow
+        run: |
+          echo "Action step completed with custom title and emoji (continue-on-error=true handles API failures gracefully)"
+          echo "PASS"

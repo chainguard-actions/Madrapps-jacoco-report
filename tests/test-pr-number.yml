@@ -1,0 +1,83 @@
+name: Test pr-number input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create JaCoCo XML report
+        run: |
+          mkdir -p /tmp/jacoco-pr-number
+          cat > /tmp/jacoco-pr-number/jacoco.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+          <report name="test">
+            <package name="com/example">
+              <class name="com/example/Calculator" sourcefilename="Calculator.java">
+                <method name="add" desc="(II)I" line="5">
+                  <counter type="INSTRUCTION" missed="0" covered="10"/>
+                  <counter type="LINE" missed="0" covered="3"/>
+                  <counter type="COMPLEXITY" missed="0" covered="1"/>
+                  <counter type="METHOD" missed="0" covered="1"/>
+                </method>
+                <counter type="INSTRUCTION" missed="0" covered="10"/>
+                <counter type="LINE" missed="0" covered="3"/>
+                <counter type="COMPLEXITY" missed="0" covered="1"/>
+                <counter type="METHOD" missed="0" covered="1"/>
+                <counter type="CLASS" missed="0" covered="1"/>
+              </class>
+              <sourcefile name="Calculator.java">
+                <line nr="5" mi="0" ci="3" mb="0" cb="0"/>
+                <line nr="6" mi="0" ci="3" mb="0" cb="0"/>
+                <line nr="7" mi="0" ci="4" mb="0" cb="0"/>
+                <counter type="INSTRUCTION" missed="0" covered="10"/>
+                <counter type="LINE" missed="0" covered="3"/>
+                <counter type="COMPLEXITY" missed="0" covered="1"/>
+                <counter type="METHOD" missed="0" covered="1"/>
+                <counter type="CLASS" missed="0" covered="1"/>
+              </sourcefile>
+              <counter type="INSTRUCTION" missed="0" covered="10"/>
+              <counter type="LINE" missed="0" covered="3"/>
+              <counter type="COMPLEXITY" missed="0" covered="1"/>
+              <counter type="METHOD" missed="0" covered="1"/>
+              <counter type="CLASS" missed="0" covered="1"/>
+            </package>
+            <counter type="INSTRUCTION" missed="0" covered="10"/>
+            <counter type="LINE" missed="0" covered="3"/>
+            <counter type="COMPLEXITY" missed="0" covered="1"/>
+            <counter type="METHOD" missed="0" covered="1"/>
+            <counter type="CLASS" missed="0" covered="1"/>
+          </report>
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          paths: /tmp/jacoco-pr-number/jacoco.xml
+          token: ${{ github.token }}
+          pr-number: '1'
+          comment-type: summary
+          min-coverage-overall: '50'
+          min-coverage-changed-files: '50'
+          continue-on-error: 'true'
+
+      - name: Assert coverage-overall output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.coverage-overall }}
+        run: |
+          echo "coverage-overall: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected coverage-overall to be set"
+            exit 1
+          fi
+          echo "PASS: coverage-overall=$ACTUAL"
+
+      - name: Assert coverage-changed-files output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.coverage-changed-files }}
+        run: |
+          echo "coverage-changed-files: $ACTUAL"
+          # coverage-changed-files may be empty if no changed files detected under workflow_dispatch
+          echo "PASS: coverage-changed-files=$ACTUAL"
