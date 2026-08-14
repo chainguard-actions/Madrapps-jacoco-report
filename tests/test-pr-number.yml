@@ -1,4 +1,4 @@
-name: Test basic usage with summary output
+name: Test pr-number input
 on:
   workflow_dispatch:
 jobs:
@@ -11,15 +11,16 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          paths: ${{ github.workspace }}/tests/fixtures/jacoco/jacoco.xml
+          paths: ${{ github.workspace }}/hardened/tests/fixtures/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-type: summary
+          pr-number: '1'
           min-coverage-overall: '80'
           min-coverage-changed-files: '80'
           continue-on-error: 'true'
           debug-mode: 'true'
 
-      - name: Assert workflow continued and outputs are valid if set
+      - name: Assert action ran and outputs are valid if set
         env:
           ACTUAL: ${{ steps.jacoco.outputs.coverage-overall }}
           OUTCOME: ${{ steps.jacoco.outcome }}

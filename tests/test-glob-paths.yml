@@ -1,4 +1,4 @@
-name: Test basic usage with summary output
+name: Test glob pattern for paths input
 on:
   workflow_dispatch:
 jobs:
@@ -11,15 +11,15 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          paths: ${{ github.workspace }}/tests/fixtures/jacoco/jacoco.xml
+          paths: '${{ github.workspace }}/tests/fixtures/jacoco/jacoco.xml,${{ github.workspace }}/tests/fixtures/jacoco/jacoco-low-coverage.xml'
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-type: summary
-          min-coverage-overall: '80'
-          min-coverage-changed-files: '80'
+          min-coverage-overall: '10'
+          min-coverage-changed-files: '10'
           continue-on-error: 'true'
           debug-mode: 'true'
 
-      - name: Assert workflow continued and outputs are valid if set
+      - name: Assert action completed with multiple files and outputs are valid if set
         env:
           ACTUAL: ${{ steps.jacoco.outputs.coverage-overall }}
           OUTCOME: ${{ steps.jacoco.outcome }}
@@ -28,9 +28,9 @@ jobs:
           echo "coverage-overall: '$ACTUAL'"
           if [ -z "$ACTUAL" ]; then
             echo "INFO: coverage-overall output is empty (API call may have failed in test env, outcome=$OUTCOME)"
-            echo "PASS: action ran without crashing workflow"
+            echo "PASS: action ran without crashing workflow with multiple jacoco files"
           elif echo "$ACTUAL" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
-            echo "PASS: coverage-overall is numeric: $ACTUAL"
+            echo "PASS: coverage-overall=$ACTUAL with multiple files"
           else
             echo "FAIL: coverage-overall is not a numeric value: $ACTUAL"
             exit 1

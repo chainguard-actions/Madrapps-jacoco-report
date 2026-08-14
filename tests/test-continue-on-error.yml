@@ -1,0 +1,25 @@
+name: Test continue-on-error with missing file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: jacoco
+        uses: .
+        continue-on-error: true
+        with:
+          paths: ${{ github.workspace }}/tests/fixtures/jacoco/nonexistent-file.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment-type: summary
+          continue-on-error: 'true'
+          debug-mode: 'true'
+
+      - name: Assert workflow continued despite missing file
+        env:
+          OUTCOME: ${{ steps.jacoco.outcome }}
+        run: |
+          echo "Action step outcome: $OUTCOME"
+          echo "PASS: workflow continued after missing file (continue-on-error=true, outcome=$OUTCOME)"

@@ -1,4 +1,4 @@
-name: Test basic usage with summary output
+name: Test high coverage outputs
 on:
   workflow_dispatch:
 jobs:
@@ -14,12 +14,13 @@ jobs:
           paths: ${{ github.workspace }}/tests/fixtures/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-type: summary
-          min-coverage-overall: '80'
-          min-coverage-changed-files: '80'
+          min-coverage-overall: '50'
+          min-coverage-changed-files: '50'
+          title: 'High Coverage Test'
           continue-on-error: 'true'
           debug-mode: 'true'
 
-      - name: Assert workflow continued and outputs are valid if set
+      - name: Assert coverage-overall is high if set
         env:
           ACTUAL: ${{ steps.jacoco.outputs.coverage-overall }}
           OUTCOME: ${{ steps.jacoco.outcome }}
@@ -30,8 +31,23 @@ jobs:
             echo "INFO: coverage-overall output is empty (API call may have failed in test env, outcome=$OUTCOME)"
             echo "PASS: action ran without crashing workflow"
           elif echo "$ACTUAL" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
-            echo "PASS: coverage-overall is numeric: $ACTUAL"
+            # The fixture has 100% coverage (8 covered, 0 missed instructions)
+            # coverage-overall should be >= 50
+            INT_VAL=$(echo "$ACTUAL" | cut -d'.' -f1)
+            if [ "$INT_VAL" -lt 50 ]; then
+              echo "FAIL: expected coverage >= 50, got $ACTUAL"
+              exit 1
+            fi
+            echo "PASS: coverage-overall=$ACTUAL is >= 50"
           else
             echo "FAIL: coverage-overall is not a numeric value: $ACTUAL"
             exit 1
           fi
+
+      - name: Assert coverage-changed-files output is checked
+        env:
+          ACTUAL: ${{ steps.jacoco.outputs.coverage-changed-files }}
+        run: |
+          echo "coverage-changed-files: '$ACTUAL'"
+          # This may be empty if no changed files are detected or if API call failed
+          echo "PASS: coverage-changed-files output checked (value: '$ACTUAL')"

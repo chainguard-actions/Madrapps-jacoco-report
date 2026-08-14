@@ -1,4 +1,4 @@
-name: Test basic usage with summary output
+name: Test custom emoji and title options
 on:
   workflow_dispatch:
 jobs:
@@ -14,12 +14,17 @@ jobs:
           paths: ${{ github.workspace }}/tests/fixtures/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-type: summary
+          title: 'My Coverage Report'
+          pass-emoji: ':white_check_mark:'
+          fail-emoji: ':red_circle:'
           min-coverage-overall: '80'
           min-coverage-changed-files: '80'
+          update-comment: 'false'
+          skip-if-no-changes: 'false'
           continue-on-error: 'true'
           debug-mode: 'true'
 
-      - name: Assert workflow continued and outputs are valid if set
+      - name: Assert action completed with custom options and outputs are valid if set
         env:
           ACTUAL: ${{ steps.jacoco.outputs.coverage-overall }}
           OUTCOME: ${{ steps.jacoco.outcome }}
@@ -28,9 +33,9 @@ jobs:
           echo "coverage-overall: '$ACTUAL'"
           if [ -z "$ACTUAL" ]; then
             echo "INFO: coverage-overall output is empty (API call may have failed in test env, outcome=$OUTCOME)"
-            echo "PASS: action ran without crashing workflow"
+            echo "PASS: action ran without crashing workflow with custom emoji and title options"
           elif echo "$ACTUAL" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
-            echo "PASS: coverage-overall is numeric: $ACTUAL"
+            echo "PASS: action completed with custom emoji and title options, coverage=$ACTUAL"
           else
             echo "FAIL: coverage-overall is not a numeric value: $ACTUAL"
             exit 1
