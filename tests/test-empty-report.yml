@@ -1,0 +1,56 @@
+name: Test empty JaCoCo report
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+      GITHUB_REPOSITORY: test-owner/test-repo
+      GITHUB_EVENT_PATH: /tmp/jacoco-push-event.json
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Write push event fixture
+        run: |
+          cat > /tmp/jacoco-push-event.json <<'EOF'
+          {
+            "before": "0000000000000000000000000000000000000000",
+            "after": "1111111111111111111111111111111111111111",
+            "repository": {
+              "full_name": "test-owner/test-repo",
+              "name": "test-repo",
+              "owner": {
+                "login": "test-owner"
+              }
+            },
+            "pusher": {
+              "name": "test-user"
+            },
+            "ref": "refs/heads/main"
+          }
+          EOF
+
+      - id: jacoco
+        uses: .
+        continue-on-error: true
+        with:
+          paths: ${{ github.workspace }}/pristine/Madrapps--jacoco-report/v1.7.2-alpha/tests/fixtures/empty-report.xml
+          token: fake-token-for-testing
+          comment-type: summary
+          min-coverage-overall: '80'
+          min-coverage-changed-files: '80'
+          pr-number: '1'
+          continue-on-error: 'true'
+
+      - name: Assert action ran without crashing
+        env:
+          OUTCOME: ${{ steps.jacoco.outcome }}
+        run: |
+          echo "jacoco step outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: jacoco step was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: jacoco step completed with outcome=$OUTCOME"

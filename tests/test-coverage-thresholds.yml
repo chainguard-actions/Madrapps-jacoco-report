@@ -1,4 +1,4 @@
-name: Test basic usage with summary output
+name: Test coverage threshold outputs
 on:
   workflow_dispatch:
 jobs:
@@ -14,17 +14,15 @@ jobs:
           paths: ${{ github.workspace }}/tests/fixtures/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-type: summary
-          min-coverage-overall: '50'
-          min-coverage-changed-files: '50'
+          min-coverage-overall: '10'
+          min-coverage-changed-files: '10'
+          title: 'Coverage Report Test'
           continue-on-error: 'true'
           debug-mode: 'true'
 
-      - name: Assert action step completed (pass or fail)
+      - name: Assert action step ran
         run: |
           echo "Step outcome: ${{ steps.jacoco.outcome }}"
-          # The action may fail because workflow_dispatch is not a supported event
-          # (only pull_request and push are supported). That is expected behavior.
-          # We just verify the step ran and did not crash the runner itself.
           if [ "${{ steps.jacoco.outcome }}" = "skipped" ]; then
             echo "FAIL: step was skipped unexpectedly"
             exit 1
@@ -39,16 +37,35 @@ jobs:
           echo "step outcome: ${{ steps.jacoco.outcome }}"
           # Under workflow_dispatch the action exits early (unsupported event),
           # so coverage-overall will be empty. That is the expected behavior.
-          # We verify the workflow itself did not crash.
           if [ "${{ steps.jacoco.outcome }}" = "failure" ] && [ -z "$ACTUAL" ]; then
             echo "PASS: action correctly reported failure for unsupported event type"
           elif [ -n "$ACTUAL" ]; then
-            # If somehow outputs were set, validate they are numeric
+            # If outputs were set, validate they are numeric and above threshold
             if ! echo "$ACTUAL" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
               echo "FAIL: coverage-overall is not a number: $ACTUAL"
               exit 1
             fi
-            echo "PASS: coverage-overall=$ACTUAL"
+            COVERAGE_INT=$(echo "$ACTUAL" | cut -d'.' -f1)
+            if [ "$COVERAGE_INT" -lt 10 ]; then
+              echo "FAIL: coverage-overall ($ACTUAL) is below minimum threshold of 10"
+              exit 1
+            fi
+            echo "PASS: coverage-overall=$ACTUAL is above threshold"
           else
             echo "PASS: action ran without crashing the workflow"
+          fi
+
+      - name: Assert coverage-changed-files output or confirm unsupported event
+        env:
+          ACTUAL: ${{ steps.jacoco.outputs.coverage-changed-files }}
+        run: |
+          echo "coverage-changed-files: '$ACTUAL'"
+          if [ -n "$ACTUAL" ]; then
+            if ! echo "$ACTUAL" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
+              echo "FAIL: coverage-changed-files is not a number: $ACTUAL"
+              exit 1
+            fi
+            echo "PASS: coverage-changed-files=$ACTUAL"
+          else
+            echo "PASS: output not set (expected for unsupported event type)"
           fi

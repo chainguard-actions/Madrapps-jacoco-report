@@ -1,4 +1,4 @@
-name: Test basic usage with summary output
+name: Test custom emoji configuration
 on:
   workflow_dispatch:
 jobs:
@@ -14,17 +14,17 @@ jobs:
           paths: ${{ github.workspace }}/tests/fixtures/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           comment-type: summary
-          min-coverage-overall: '50'
-          min-coverage-changed-files: '50'
+          min-coverage-overall: '0'
+          min-coverage-changed-files: '0'
+          pass-emoji: ':white_check_mark:'
+          fail-emoji: ':red_circle:'
+          title: 'Custom Emoji Coverage Report'
           continue-on-error: 'true'
           debug-mode: 'true'
 
-      - name: Assert action step completed (pass or fail)
+      - name: Assert action step ran
         run: |
           echo "Step outcome: ${{ steps.jacoco.outcome }}"
-          # The action may fail because workflow_dispatch is not a supported event
-          # (only pull_request and push are supported). That is expected behavior.
-          # We just verify the step ran and did not crash the runner itself.
           if [ "${{ steps.jacoco.outcome }}" = "skipped" ]; then
             echo "FAIL: step was skipped unexpectedly"
             exit 1
@@ -39,16 +39,20 @@ jobs:
           echo "step outcome: ${{ steps.jacoco.outcome }}"
           # Under workflow_dispatch the action exits early (unsupported event),
           # so coverage-overall will be empty. That is the expected behavior.
-          # We verify the workflow itself did not crash.
           if [ "${{ steps.jacoco.outcome }}" = "failure" ] && [ -z "$ACTUAL" ]; then
             echo "PASS: action correctly reported failure for unsupported event type"
           elif [ -n "$ACTUAL" ]; then
-            # If somehow outputs were set, validate they are numeric
+            # If outputs were set, validate they are a valid percentage
             if ! echo "$ACTUAL" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
-              echo "FAIL: coverage-overall is not a number: $ACTUAL"
+              echo "FAIL: coverage-overall is not a valid number: $ACTUAL"
               exit 1
             fi
-            echo "PASS: coverage-overall=$ACTUAL"
+            COVERAGE_INT=$(echo "$ACTUAL" | cut -d'.' -f1)
+            if [ "$COVERAGE_INT" -gt 100 ]; then
+              echo "FAIL: coverage-overall ($ACTUAL) exceeds 100%"
+              exit 1
+            fi
+            echo "PASS: coverage-overall=$ACTUAL is a valid percentage"
           else
             echo "PASS: action ran without crashing the workflow"
           fi
