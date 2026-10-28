@@ -6,12 +6,12 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 ## Versions
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.7.2 | [`v1.7.2`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.7.2) | [`50d3aff`](https://github.com/Madrapps/jacoco-report/commit/50d3aff4548aa991e6753342d9ba291084e63848) |
-| v1.7.2-alpha | [`v1.7.2-alpha`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.7.2-alpha) | [`960061c`](https://github.com/Madrapps/jacoco-report/commit/960061cb053139d3ace03281e4da0ee9b7d440cd) |
-| v1.7.2-beta | [`v1.7.2-beta`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.7.2-beta) | [`e4bbaf0`](https://github.com/Madrapps/jacoco-report/commit/e4bbaf00a0b8920cb86a448ae3ec0fc6f6bfeacc) |
-| v1.8.0 | [`v1.8.0`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.8.0) | [`e51ce1f`](https://github.com/Madrapps/jacoco-report/commit/e51ce1f46f7f8b5331593f935e59cbaf44b84920) |
+| Version | Tag | Upstream commit | Hardening report |
+|---------|-----|-----------------|------------------|
+| v1.7.2 | [`v1.7.2`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.7.2) | [`50d3aff`](https://github.com/Madrapps/jacoco-report/commit/50d3aff4548aa991e6753342d9ba291084e63848) | [`HARDENING.md`](https://github.com/chainguard-actions/Madrapps-jacoco-report/blob/v1.7.2/HARDENING.md) |
+| v1.7.2-alpha | [`v1.7.2-alpha`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.7.2-alpha) | [`960061c`](https://github.com/Madrapps/jacoco-report/commit/960061cb053139d3ace03281e4da0ee9b7d440cd) | [`HARDENING.md`](https://github.com/chainguard-actions/Madrapps-jacoco-report/blob/v1.7.2-alpha/HARDENING.md) |
+| v1.7.2-beta | [`v1.7.2-beta`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.7.2-beta) | [`e4bbaf0`](https://github.com/Madrapps/jacoco-report/commit/e4bbaf00a0b8920cb86a448ae3ec0fc6f6bfeacc) | [`HARDENING.md`](https://github.com/chainguard-actions/Madrapps-jacoco-report/blob/v1.7.2-beta/HARDENING.md) |
+| v1.8.0 | [`v1.8.0`](https://github.com/chainguard-actions/Madrapps-jacoco-report/tree/v1.8.0) | [`e51ce1f`](https://github.com/Madrapps/jacoco-report/commit/e51ce1f46f7f8b5331593f935e59cbaf44b84920) | [`HARDENING.md`](https://github.com/chainguard-actions/Madrapps-jacoco-report/blob/v1.8.0/HARDENING.md) |
 
 ## Privacy
 
